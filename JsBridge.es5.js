@@ -14,18 +14,31 @@ if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandl
 }
 
 window.JSBridge = {
-  // js调用native接口
+  // js调用native接口, 如果只是注册，并不调用isRegister设为true，返回一个id
+  // 当想执行时 callback设为返回的id
   invoke: function invoke(functionName, callback, data) {
-    var thisCallbackId = callbackId++;
-    callbacks[thisCallbackId] = callback;
-    if (JSBridge._getSystem() == 0 && JSBridge._getAndroidVersion() <= 4.2) {
+    var isRegister = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    var thisCallbackId = void 0;
+    if (typeof callback === 'function') {
+      thisCallbackId = callbackId++;
+      callbacks[thisCallbackId] = callback;
+
+      if (isRegister) {
+        return thisCallbackId;
+      }
+    } else {
+      thisCallbackId = callback;
+    }
+
+    if (this._getSystem() == 0 && this._getAndroidVersion() <= 4.2) {
       var result = prompt('mposjs://postMessage?jsonParams=' + JSON.stringify({
         data: data,
         functionName: functionName,
         callbackId: thisCallbackId
       }));
       if (result) {
-        JSBridge.receiveMessage(result);
+        this.receiveMessage(result);
       }
     } else {
       nativeBridge.postMessage({
@@ -57,7 +70,7 @@ window.JSBridge = {
       } else {
         result.error = '未找到调用方法';
       }
-      if (JSBridge._getSystem() == 0 && JSBridge._getAndroidVersion() >= 4.4) {
+      if (this._getSystem() == 0 && this._getAndroidVersion() >= 4.4) {
         return { responseId: responseId, data: result };
       } else {
         nativeBridge.postMessage({

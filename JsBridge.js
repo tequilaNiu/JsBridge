@@ -15,10 +15,21 @@ export const initJSBridge = () => {
   }
 
   window.JSBridge = {
-    // js调用native接口
-    invoke: function(functionName, callback, data) {
-      let thisCallbackId = callbackId++;
-      callbacks[thisCallbackId] = callback;
+    // js调用native接口, 如果只是注册，并不调用isRegister设为true，返回一个id
+    // 当想执行时 callback设为返回的id
+    invoke: function(functionName, callback, data, isRegister = false) {
+      let thisCallbackId;
+      if (typeof callback === 'function') {
+        thisCallbackId = callbackId++;
+        callbacks[thisCallbackId] = callback;
+
+        if (isRegister) {
+          return thisCallbackId;
+        }
+      } else {
+        thisCallbackId = callback;
+      }
+
       if (this._getSystem() == 0 && this._getAndroidVersion() <= 4.2) {
         const result = prompt(`mposjs://postMessage?jsonParams=${JSON.stringify({ 
           data,
