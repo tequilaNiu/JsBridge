@@ -19,14 +19,15 @@ export const initJSBridge = () => {
     invoke: (functionName, callback, data) => {
       let thisCallbackId = callbackId++;
       callbacks[thisCallbackId] = callback;
-      this._getNativeBridge();
-      if (this._getSystem() == 0 && this._getAndroidVersion() <= 4.2) {
+      if (JSBridge._getSystem() == 0 && JSBridge._getAndroidVersion() <= 4.2) {
         const result = prompt(`mposjs://postMessage?jsonParams=${JSON.stringify({ 
           data,
           functionName,
           callbackId: thisCallbackId
         })}`)
-        this.receiveMessage(result);
+        if (result) {
+          JSBridge.receiveMessage(result);
+        }
       } else {
         nativeBridge.postMessage({
           functionName,
@@ -41,6 +42,12 @@ export const initJSBridge = () => {
       let data = params.data || {};
       let callbackId = params.callbackId;
       let responseId = params.responseId;
+      let errorCode = params.errorCode;
+      let errorMsg = params.errorMsg;
+      
+      if (errorCode) {
+        console.log(errorCode, errorMsg);
+      }
 
       if (callbackId && callbacks[callbackId]) {
         callbacks[callbackId](data);
@@ -51,7 +58,7 @@ export const initJSBridge = () => {
         } else {
           result.error = '未找到调用方法';
         }
-        if (this._getSystem() == 0 && this._getAndroidVersion() >= 4.4) {
+        if (JSBridge._getSystem() == 0 && JSBridge._getAndroidVersion() >= 4.4) {
           return { responseId, data: result };
         } else {
           nativeBridge.postMessage({
