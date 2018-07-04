@@ -16,17 +16,17 @@ export const initJSBridge = () => {
 
   window.JSBridge = {
     // js调用native接口
-    invoke: (functionName, callback, data) => {
+    invoke: function(functionName, callback, data) {
       let thisCallbackId = callbackId++;
       callbacks[thisCallbackId] = callback;
-      if (JSBridge._getSystem() == 0 && JSBridge._getAndroidVersion() <= 4.2) {
+      if (this._getSystem() == 0 && this._getAndroidVersion() <= 4.2) {
         const result = prompt(`mposjs://postMessage?jsonParams=${JSON.stringify({ 
           data,
           functionName,
           callbackId: thisCallbackId
         })}`)
         if (result) {
-          JSBridge.receiveMessage(result);
+          this.receiveMessage(result);
         }
       } else {
         nativeBridge.postMessage({
@@ -37,7 +37,7 @@ export const initJSBridge = () => {
       }
     },
     // native调用js
-    receiveMessage: (params) => {
+    receiveMessage: function(params) {
       let functionName = params.functionName;
       let data = params.data || {};
       let callbackId = params.callbackId;
@@ -58,7 +58,7 @@ export const initJSBridge = () => {
         } else {
           result.error = '未找到调用方法';
         }
-        if (JSBridge._getSystem() == 0 && JSBridge._getAndroidVersion() >= 4.4) {
+        if (this._getSystem() == 0 && this._getAndroidVersion() >= 4.4) {
           return { responseId, data: result };
         } else {
           nativeBridge.postMessage({
