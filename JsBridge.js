@@ -21,11 +21,12 @@ export const initJSBridge = () => {
       callbacks[thisCallbackId] = callback;
       this._getNativeBridge();
       if (this._getSystem() == 0 && this._getAndroidVersion() <= 4.2) {
-        prompt(`mposjs://postMessage?${JSON.stringify({ 
+        const result = prompt(`mposjs://postMessage?jsonParams=${JSON.stringify({ 
           data,
           functionName,
-          callbackId: this.callbackId
+          callbackId: thisCallbackId
         })}`)
+        this.receiveMessage(result);
       } else {
         nativeBridge.postMessage({
           functionName,
