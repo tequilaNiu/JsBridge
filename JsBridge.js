@@ -40,11 +40,22 @@ export const initJSBridge = () => {
           this.receiveMessage(result);
         }
       } else {
-        nativeBridge.postMessage(JSON.stringify({
-          functionName,
-          data: data || {},
-          callbackId: thisCallbackId,
-        }));
+        if (this._getSystem() == 0) {
+          nativeBridge.postMessage(JSON.stringify({
+            functionName,
+            data: data || {},
+            callbackId: thisCallbackId,
+          }));
+        } else if (this._getSystem() == 1) {
+          nativeBridge.postMessage({
+            functionName,
+            data: data || {},
+            callbackId: thisCallbackId,
+          });
+        } else {
+          throw Error('未知移动设备！');
+        }
+        
       }
     },
     // native调用js
@@ -72,10 +83,19 @@ export const initJSBridge = () => {
         if (this._getSystem() == 0 && this._getAndroidVersion() >= 4.4) {
           return { responseId, data: result };
         } else {
-          nativeBridge.postMessage(JSON.stringify({
-            responseId: responseId,
-            data: result,
-          }));
+          if (this._getSystem() == 0) {
+            nativeBridge.postMessage(JSON.stringify({
+              responseId: responseId,
+              data: result,
+            }));
+          } else if (this._getSystem() == 1) {
+            nativeBridge.postMessage({
+              responseId: responseId,
+              data: result,
+            });
+          } else {
+            throw Error('未知移动设备！');
+          }
         }
       }
     },
