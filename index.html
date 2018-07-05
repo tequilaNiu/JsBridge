@@ -1,0 +1,86 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Carson_Ho</title>
+    <script src="./myjsBrage.js"></script>
+    <script>
+
+
+
+
+
+    /*function receiveMessage(data){
+       alert('？');
+       return data;
+
+    }*/
+   function callJS2(data){
+       alert('??'+data);
+
+    }
+    function callAndroid(){
+            alert();
+           window.mpos_bridge.postMessage('{"data":{"name":"nolan"},"functionName":"getVipHttpParams","callbackId":1}');
+    }
+    function callAndroidDown(){
+        var result=prompt('mposjs://postMessage?jsonParams={"data":{"name":"nolan"},"functionName":"getVipHttpParams","callbackId":1}');
+    }
+
+    function jsCallAndroidTest(){
+      window.JSBridge.invoke('getVipHttpParams', function(params) {
+              console.log('end.>>>>>>>>>>我这里做一些事情，访问api拿到数据，保存数据。', params);
+      }, {})
+    }
+
+    // 华丽的开始
+    function goToPay() {
+      window.JSBridge.invoke('memberCenterNextStep', function() {
+        console.log('******收到了就有问题*******')
+      }, {
+        "RETURNCODE": "0000",
+        "RETURNCON": "成功",
+        "RESULTCODE": "0000",
+        "RESULTMSG": "成功",
+        "memberStatus": "00",
+        "effectiveDate": "有效期至2020-03-26",
+        "normalSettleFee": "2~3",
+        "memberSettleFee": "0",
+        "member": "010",
+        "memberPackage": [{
+          "memberMoney": "199",
+          "memberTime": "365天",
+          "memberId": "010"
+        }, {
+          "memberMoney": "29",
+          "memberTime": "30天",
+          "memberId": "020"
+        }],
+        "TL": "136.174",
+        "TOKEN_ID": "",
+        "SYSTEM_TIME": 1530773213898,
+        "SYSTEM_STR": "2018-07-05 14:46:53",
+        "sign": "995168c71ef0b67183439b1f9c6aa7398905155c977d4bc2e37fa6f8b48b2c18"
+      })
+    }
+
+    JSBridge.register('', function() {
+      
+    })
+
+
+
+
+    </script>
+
+</head>
+
+<body>
+<div>nihao</div>
+<!-- 点击按钮则调用callAndroid（）方法  -->
+<button type="button" id="button1" onclick="callAndroid()">点击调用Android代码（4.2版本以上）</button>
+<button type="button" id="button2" onclick="callAndroidDown()">点击调用Android代码（4.2版本以下）</button>
+<button type="button" id="button3" onclick="jsCallAndroidTest()">点击调用Android代码</button>
+<button type="button" id="button4" onclick="goToPay()">华丽的去支付</button>
+</body>
+</html>

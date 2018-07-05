@@ -108,12 +108,11 @@ export const initJSBridge = () => {
         }
       }
     },
-    // 提供给native调用的方法
+    // 提供给native调用的方法，此方法有待扩充
     register: (functionName, callback) => {
       if (!registerFuncs[functionName]) {
-        registerFuncs[functionName] = {};
+        registerFuncs[functionName] = callback;
       }
-      registerFuncs[functionName] = callback;
     },
     // 判断是安卓还是ios 0:android  1:ios -1:错误
     _getSystem: () => {
