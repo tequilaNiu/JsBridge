@@ -4,14 +4,16 @@ export const initJSBridge = () => {
   let callbacks = {};
   let registerFuncs = {};
   let nativeBridge = null;
-  // Android、UIWebView、WKWebView
+  // ios的WKWebView
   if (window.webkit && window.webkit.messageHandlers
       && window.webkit.messageHandlers.mpos_bridge) {
     nativeBridge = window.webkit.messageHandlers.mpos_bridge;
+  // android 4.2以上
   } else if (window.mpos_bridge) {
     nativeBridge = window.mpos_bridge;
+  // android 4.2以下及其他
   } else {
-    throw Error('mpos_bridge未注入！');
+    nativeBridge = {};
   }
 
   window.JSBridge = {
@@ -80,22 +82,29 @@ export const initJSBridge = () => {
         } else {
           result.error = '未找到调用方法';
         }
+        // 先判断是不是android4.4以上、如果是直接返回
         if (this._getSystem() == 0 && this._getAndroidVersion() >= 4.4) {
           return { responseId, data: result };
+        // 如果是android4.2以下，通过prompt返回
+        } else if (this._getSystem() == 0 && this._getAndroidVersion() <= 4.2) {
+          prompt(`mposjs://postMessage?jsonParams=${JSON.stringify({ 
+            responseId,
+            data: result,
+          })}`)
+        // 剩下的android通过postMessage返回
+        } else if (this._getSystem() == 0) {
+          nativeBridge.postMessage(JSON.stringify({
+            responseId: responseId,
+            data: result,
+          }));
+        // ios通过postMessage返回
+        } else if (this._getSystem() == 1) {
+          nativeBridge.postMessage({
+            responseId: responseId,
+            data: result,
+          });
         } else {
-          if (this._getSystem() == 0) {
-            nativeBridge.postMessage(JSON.stringify({
-              responseId: responseId,
-              data: result,
-            }));
-          } else if (this._getSystem() == 1) {
-            nativeBridge.postMessage({
-              responseId: responseId,
-              data: result,
-            });
-          } else {
-            throw Error('未知移动设备！');
-          }
+          throw Error('未知移动设备！');
         }
       }
     },
