@@ -15,15 +15,15 @@ export const initJSBridge = () => {
   }
 
   window.JSBridge = {
-    // js调用native接口, 如果只是注册，并不调用isRegister设为true，返回一个id
-    // 当想执行时 callback设为返回的id
-    invoke: function(functionName, callback, data, isRegister = false) {
+    // js调用native接口, 如果只是注册，并不调用,data不用传或传null，返回一个id
+    // 当想执行时 callback设为返回的id，并附上需要的参数
+    invoke: function(functionName, callback, data = null) {
       let thisCallbackId;
       if (typeof callback === 'function') {
-        thisCallbackId = callbackId++;
+        thisCallbackId = ++callbackId;
         callbacks[thisCallbackId] = callback;
 
-        if (isRegister) {
+        if (data === null) {
           return thisCallbackId;
         }
       } else {
@@ -40,11 +40,11 @@ export const initJSBridge = () => {
           this.receiveMessage(result);
         }
       } else {
-        nativeBridge.postMessage({
+        nativeBridge.postMessage(JSON.stringify({
           functionName,
           data: data || {},
           callbackId: thisCallbackId,
-        });        
+        }));
       }
     },
     // native调用js
@@ -72,10 +72,10 @@ export const initJSBridge = () => {
         if (this._getSystem() == 0 && this._getAndroidVersion() >= 4.4) {
           return { responseId, data: result };
         } else {
-          nativeBridge.postMessage({
+          nativeBridge.postMessage(JSON.stringify({
             responseId: responseId,
             data: result,
-          });
+          }));
         }
       }
     },

@@ -1,4 +1,3 @@
-'use strict';
 
 var callbackId = 0;
 var callbacks = {};
@@ -14,17 +13,17 @@ if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandl
 }
 
 window.JSBridge = {
-  // js调用native接口, 如果只是注册，并不调用isRegister设为true，返回一个id
-  // 当想执行时 callback设为返回的id
-  invoke: function invoke(functionName, callback, data) {
-    var isRegister = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+  // js调用native接口, 如果只是注册，并不调用,data不用传或传null，返回一个id
+  // 当想执行时 callback设为返回的id，并附上需要的参数
+  invoke: function invoke(functionName, callback) {
+    var data = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
     var thisCallbackId = void 0;
     if (typeof callback === 'function') {
-      thisCallbackId = callbackId++;
+      thisCallbackId = ++callbackId;
       callbacks[thisCallbackId] = callback;
 
-      if (isRegister) {
+      if (data === null) {
         return thisCallbackId;
       }
     } else {
@@ -41,11 +40,11 @@ window.JSBridge = {
         this.receiveMessage(result);
       }
     } else {
-      nativeBridge.postMessage({
+      nativeBridge.postMessage(JSON.stringify({
         functionName: functionName,
         data: data || {},
         callbackId: thisCallbackId
-      });
+      }));
     }
   },
   // native调用js
@@ -73,10 +72,10 @@ window.JSBridge = {
       if (this._getSystem() == 0 && this._getAndroidVersion() >= 4.4) {
         return { responseId: responseId, data: result };
       } else {
-        nativeBridge.postMessage({
+        nativeBridge.postMessage(JSON.stringify({
           responseId: responseId,
           data: result
-        });
+        }));
       }
     }
   },
